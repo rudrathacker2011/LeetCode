@@ -1,38 +1,9 @@
-"""
-leetcode_sync.py
-Pulls your recent ACCEPTED LeetCode submissions and writes them into a local
-git repo, organized by problem, ready to commit/push to GitHub.
-
-SETUP (do this once, locally — never in chat, never committed to git):
-  1. Log into leetcode.com in your browser.
-  2. DevTools -> Application -> Cookies -> copy:
-       - LEETCODE_SESSION
-       - csrftoken
-  3. Set them as environment variables in your terminal session:
-
-       export LEETCODE_SESSION="paste_here"
-       export LEETCODE_CSRF_TOKEN="paste_here"
-
-     (On Windows PowerShell: $env:LEETCODE_SESSION="...")
-
-  4. Never put these values directly in this file or in a chat message.
-     If you're automating with GitHub Actions, store them as encrypted
-     repo Secrets instead, and this script will pick them up as env vars
-     the same way.
-
-  5. Rotate/replace these values whenever you suspect they were exposed
-     (e.g. logging out and back in on leetcode.com issues a fresh session
-     and invalidates the old one).
-
-USAGE:
-  python leetcode_sync.py --repo-dir ./leetcode-solutions --limit 20
-"""
-
 import os
 import argparse
 import subprocess
 import requests
-
+from dotenv import load_dotenv
+load_dotenv()
 LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
 
 EXT_MAP = {
