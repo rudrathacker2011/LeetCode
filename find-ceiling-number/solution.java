@@ -13,6 +13,6 @@ class solution {
                 s = mid + 1;
             }
         }
-        return ans;
+        return ans; // also return s ; works in alternate of return ans.
     }
 }
