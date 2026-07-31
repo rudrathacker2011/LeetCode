@@ -16,8 +16,6 @@ class solution {
         return ans; // also return s ; works in alternate of return ans.
     }
 }
-<<<<<<< HEAD
-=======
 /*
 After binary search finishes:
 
@@ -30,4 +28,3 @@ s = First element on the RIGHT side
 Ceiling = arr[s]
 Floor   = arr[e]
 */
->>>>>>> 929dd03 (Add floor and ceiling binary search solutions)
