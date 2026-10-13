@@ -109,8 +109,21 @@ def git_commit_and_push(repo_dir, message="Sync LeetCode solutions"):
         capture_output=True, text=True,
     )
     if result.returncode != 0 and "nothing to commit" not in result.stdout:
-        print(result.stdout, result.stderr)
-        return
+        raise RuntimeError(
+            f"Git commit failed.\n{result.stdout}{result.stderr}"
+        )
+
+    try:
+        subprocess.run(
+            ["git", "-C", repo_dir, "pull", "--rebase", "origin", "main"],
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            "Could not rebase local changes onto origin/main. "
+            "Resolve the reported conflicts, then run the sync again."
+        ) from exc
+
     subprocess.run(["git", "-C", repo_dir, "push", "origin", "main"], check=True)
     print("Pushed to GitHub.")
 
