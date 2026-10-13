@@ -1,6 +1,7 @@
 import os
 import argparse
 import subprocess
+from datetime import datetime, timezone
 import requests
 from dotenv import load_dotenv
 load_dotenv()
@@ -97,9 +98,22 @@ def save_solution(repo_dir, title_slug, lang, code):
     folder = os.path.join(repo_dir, title_slug)
     os.makedirs(folder, exist_ok=True)
     filepath = os.path.join(folder, f"solution.{ext}")
+
+    if os.path.exists(filepath):
+        with open(filepath, "r", encoding="utf-8") as f:
+            if f.read() == code:
+                return filepath, False
+
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(code)
-    return filepath
+    return filepath, True
+
+
+def is_submission_today(submission, today):
+    submitted_at = datetime.fromtimestamp(
+        int(submission["timestamp"]), tz=timezone.utc
+    ).astimezone()
+    return submitted_at.date() == today
 
 
 def git_commit_and_push(repo_dir, message="Sync LeetCode solutions"):
@@ -137,7 +151,12 @@ def main():
 
     headers = get_headers()
     submissions = fetch_submission_list(headers, limit=args.limit)
-    accepted = [s for s in submissions if s["statusDisplay"] == "Accepted"]
+    today = datetime.now().astimezone().date()
+    accepted = [
+        s
+        for s in submissions
+        if s["statusDisplay"] == "Accepted" and is_submission_today(s, today)
+    ]
 
     seen_slugs = set()
     for sub in accepted:
@@ -147,8 +166,8 @@ def main():
         seen_slugs.add(slug)
 
         code = fetch_submission_code(headers, sub["id"])
-        path = save_solution(args.repo_dir, slug, sub["lang"], code)
-        print(f"Saved: {path}")
+        path, changed = save_solution(args.repo_dir, slug, sub["lang"], code)
+        print(f"{'Saved' if changed else 'Skipped unchanged'}: {path}")
 
     if not args.no_push:
         git_commit_and_push(args.repo_dir)
